@@ -1,0 +1,168 @@
+--[[
+
+    WindUI Minimal Example
+    
+    
+]]
+
+local WindUI
+
+do
+    local ok, result = pcall(function()
+        return require("./src/Init")
+    end)
+    
+    if ok then
+        WindUI = result
+    else 
+        WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/dist/main.lua"))()
+    end
+end
+
+-- Window
+local Window = WindUI:CreateWindow({
+    Title = "Exe fps ez Hub", -- ชื่อ Window
+    Author = "Zeno-Hub238", --  Author
+    Folder = "ftgshub",
+    Icon = nil, -- 
+    IconSize = 22*2,
+    NewElements = true,
+    
+    HideSearchBar = false,
+    
+    OpenButton = {
+        Title = "Exe fps ez Hub", --  UI
+        CornerRadius = UDim.new(1,0),
+        StrokeThickness = 3,
+        Enabled = true,
+        Draggable = true,
+        OnlyMobile = false,
+        
+        Color = ColorSequence.new(
+            Color3.fromHex("#30FF6A"), 
+            Color3.fromHex("#e7ff2f")
+        ),
+        Icon = nil, -- 
+    },
+    
+    KeySystem = nil -- ปิด Key System
+})
+
+--  Tab
+local ElementsSection = Window:Section({ Title = "Elements" })
+
+-- -----------------------------
+
+-- -----------------------------
+local FOV_CIRCLE = Drawing.new("Circle") -- สร้างวงกลม
+FOV_CIRCLE.Visible = false
+FOV_CIRCLE.Color = Color3.fromRGB(255, 255, 0)
+FOV_CIRCLE.Thickness = 1
+
+-- ตัวแปรสถานะ (เป็น Logic ที่เชื่อมกับปุ่ม UI)
+_G.ShowFOV = false
+_G.FOVValue = 371
+_G.MagicBullet = false
+_G.AimPart = "Head"
+
+-- Logic การคำนวณหาเป้าหมาย (หัวใจสำคัญ)
+local function getTarget()
+    local nearestTarget = nil
+    local shortestDistance = _G.FOVValue
+    
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild(_G.AimPart) then
+            -- Logic: แปลงตำแหน่ง 3D เป็นพิกัดบนจอ (Viewport)
+            local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character[_G.AimPart].Position)
+            
+            if onScreen then
+                -- Logic: คำนวณระยะห่างระหว่าง "เป้า" กับ "หัวศัตรู"
+                local mousePos = Vector2.new(game.Players.LocalPlayer:GetMouse().X, game.Players.LocalPlayer:GetMouse().Y + 36)
+                local distance = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
+                
+                if distance < shortestDistance then
+                    nearestTarget = v.Character[_G.AimPart]
+                    shortestDistance = distance
+                end
+            end
+        end
+    end
+    return nearestTarget
+end
+local PVPTab = ElementsSection:Tab({
+    Title = "PVP",
+    Icon = nil
+})
+
+PVPTab:Section({
+    Title = "PVP Options",
+    TextSize = 20,
+    FontWeight = Enum.FontWeight.SemiBold
+})
+PVPTab:Toggle({
+    Title = "Show FOV",
+    Default = false,
+    Callback = function(Value)
+        _G.ShowFOV = Value
+        FOV_CIRCLE.Visible = Value
+    end
+})
+
+PVPTab:Slider({
+    Title = "FOV Size",
+    Min = 0,
+    Max = 800,
+    Default = 371,
+    Callback = function(Value)
+        _G.FOVValue = Value
+    end
+})
+
+PVPTab:Toggle({
+    Title = "Magic Bullet",
+    Default = false,
+    Callback = function(Value)
+        _G.MagicBullet = Value
+    end
+})
+-- -----------------------------
+
+-- -----------------------------
+local ESPTab = ElementsSection:Tab({
+    Title = "ESP",
+    Icon = nil
+})
+
+ESPTab:Section({
+    Title = "ESP Options",
+    TextSize = 20,
+    FontWeight = Enum.FontWeight.SemiBold
+})
+
+-- -----------------------------
+
+-- -----------------------------
+local LootTab = ElementsSection:Tab({
+    Title = "เก็บของ 🎁",
+    Icon = nil
+})
+
+LootTab:Section({
+    Title = "Loot Options",
+    TextSize = 20,
+    FontWeight = Enum.FontWeight.SemiBold
+})
+
+-- -----------------------------
+
+-- -----------------------------
+local BodyTab = ElementsSection:Tab({
+    Title = "ร่างกาย 💪",
+    Icon = nil
+})
+
+BodyTab:Section({
+    Title = "Body Options",
+    TextSize = 20,
+    FontWeight = Enum.FontWeight.SemiBold
+})
