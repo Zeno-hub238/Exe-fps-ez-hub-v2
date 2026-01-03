@@ -54,6 +54,28 @@ local ElementsSection = Window:Section({ Title = "Elements" })
 -- -----------------------------
 
 -- -----------------------------
+Lua
+-- [[ 1. LOGIC: สร้างวงกลมและตัวแปรเริ่มต้น ]]
+local FOV_CIRCLE = Drawing.new("Circle")
+FOV_CIRCLE.Visible = false
+FOV_CIRCLE.Color = Color3.fromRGB(255, 255, 0) -- สีเหลือง
+FOV_CIRCLE.Thickness = 1
+FOV_CIRCLE.Transparency = 1
+FOV_CIRCLE.Radius = 371
+FOV_CIRCLE.NumSides = 64
+
+_G.ShowFOV = false
+_G.FOVValue = 371
+
+-- โค้ดที่ทำให้วงกลมขยับตามเป้าเล็งตลอดเวลา
+game:GetService("RunService").RenderStepped:Connect(function()
+    if _G.ShowFOV then
+        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+        FOV_CIRCLE.Position = Vector2.new(mouse.X, mouse.Y + 36)
+    else
+        FOV_CIRCLE.Visible = false
+    end
+end)
 local FOV_CIRCLE = Drawing.new("Circle") -- สร้างวงกลม
 FOV_CIRCLE.Visible = false
 FOV_CIRCLE.Color = Color3.fromRGB(255, 255, 0)
@@ -99,32 +121,24 @@ PVPTab:Section({
     TextSize = 20,
     FontWeight = Enum.FontWeight.SemiBold
 })
-PVPTab:Toggle({
-    Title = "Show FOV",
-    Default = false,
-    Callback = function(Value)
-        _G.ShowFOV = Value
-        FOV_CIRCLE.Visible = Value
-    end
-})
+-- [[ 2. UI: ปุ่มกดสำหรับควบคุม ]]
+PVPTab:Toggle({ 
+    Title = "Show FOV", 
+    Default = false, 
+    Callback = function(Value) 
+        _G.ShowFOV = Value 
+        if FOV_CIRCLE then 
+            FOV_CIRCLE.Visible = Value 
+        end 
+    end 
+}) 
 
-PVPTab:Slider({
-    Title = "FOV Size",
-    Min = 0,
-    Max = 800,
-    Default = 371,
-    Callback = function(Value)
-        _G.FOVValue = Value
+game:GetService("RunService").RenderStepped:Connect(function()
+    if _G.ShowFOV and FOV_CIRCLE then
+        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+        FOV_CIRCLE.Position = Vector2.new(mouse.X, mouse.Y + 36) -- ให้วงกลมอยู่ตรงกลางเป้าเล็ง
     end
-})
-
-PVPTab:Toggle({
-    Title = "Magic Bullet",
-    Default = false,
-    Callback = function(Value)
-        _G.MagicBullet = Value
-    end
-})
+end)
 -- -----------------------------
 
 -- -----------------------------
